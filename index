@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>पदाधिकारी नोंदणी - कुस्ती मल्लविद्या महासंघ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Mukta', sans-serif; background-color: #fff7ed; }
+        .theme-bg { background-color: #ea580c; }
+        .theme-text { color: #ea580c; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-orange-200">
+        <!-- Header -->
+        <div class="theme-bg text-white text-center py-6 px-4">
+            <h1 class="text-2xl font-bold">महाराष्ट्र राज्य कुस्ती मल्लविद्या महासंघ</h1>
+            <p class="text-sm opacity-90 mt-1">अधिकृत जिल्हा व तालुका पदाधिकारी नोंदणी फॉर्म</p>
+        </div>
+
+        <div class="p-6">
+            <!-- Status & Members Count -->
+            <div id="membersBadge" class="hidden mb-6 bg-orange-100 border border-orange-300 text-orange-800 px-4 py-3 rounded text-center font-semibold shadow-sm">
+                तयार यादीत <span id="count" class="font-bold text-xl">0</span> पदाधिकारी जोडले आहेत.
+            </div>
+
+            <form id="regForm" onsubmit="event.preventDefault();">
+                <div class="space-y-5">
+                    <!-- Level -->
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">पदाचा स्तर निवडा <span class="text-red-500">*</span></label>
+                        <select id="level" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-gray-50" onchange="updateRoles()" required>
+                            <option value="">-- स्तर निवडा --</option>
+                            <option value="जिल्हा">जिल्हा</option>
+                            <option value="तालुका">तालुका</option>
+                        </select>
+                    </div>
+
+                    <!-- Region -->
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">जिल्हा / तालुक्याचे नाव <span class="text-red-500">*</span></label>
+                        <input type="text" id="region" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-gray-50" placeholder="उदा. सांगली किंवा पलूस" required>
+                    </div>
+
+                    <!-- Role -->
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">पद / जबाबदारी <span class="text-red-500">*</span></label>
+                        <select id="role" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-gray-50" onchange="checkOtherRole()" required>
+                            <option value="">-- आधी स्तर निवडा --</option>
+                        </select>
+                    </div>
+
+                    <!-- Other Role -->
+                    <div id="otherRoleDiv" class="hidden">
+                        <label class="block text-gray-700 font-semibold mb-2">पदाचे नाव लिहा <span class="text-red-500">*</span></label>
+                        <input type="text" id="otherRole" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-gray-50" placeholder="पदाचे नाव टाईप करा">
+                    </div>
+
+                    <!-- Full Name -->
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">पदाधिकाऱ्याचे पूर्ण नाव <span class="text-red-500">*</span></label>
+                        <input type="text" id="fullName" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-gray-50" placeholder="उदा. पै. मारुतीराव मोहिते" required>
+                    </div>
+
+                    <!-- Mobile -->
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">मोबाईल / व्हॉट्सॲप नंबर <span class="text-red-500">*</span></label>
+                        <input type="tel" id="mobile" pattern="[0-9]{10}" class="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-orange-500 bg-gray-50" placeholder="१० अंकी नंबर" required>
+                    </div>
+
+                    <!-- Photo -->
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">फोटो <span class="text-red-500">*</span></label>
+                        <input type="file" id="photo" accept="image/*" class="w-full p-2 border border-gray-300 rounded text-gray-700 bg-gray-50" required>
+                        <p class="text-xs text-gray-500 mt-1">चेहरा स्पष्ट दिसेल असा फोटो अपलोड करा.</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                    <button type="button" onclick="addMember()" class="w-full bg-orange-50 text-orange-700 border border-orange-400 font-bold py-3 px-4 rounded hover:bg-orange-100 transition shadow-sm">
+                        ➕ आणखी एक सदस्य जोडा
+                    </button>
+                    <button type="button" onclick="submitData()" id="submitBtn" class="w-full theme-bg text-white font-bold py-3 px-4 rounded shadow-lg hover:bg-orange-700 transition">
+                        🚀 सर्व माहिती सबमिट करा
+                    </button>
+                </div>
+                
+                <div id="loading" class="hidden mt-4 text-center text-orange-600 font-bold animate-pulse">
+                    माहिती सर्व्हरवर सेव्ह होत आहे, कृपया प्रतीक्षा करा...
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // तुमची वेब ॲप लिंक इथे यशस्वीरित्या जोडली आहे!
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzafAUKTScVD77Knw2krnlZQ4CgtJuKntRb-8Y54MV2SW47T7MIvktqjNygsLUA8tc8FQ/exec"; 
+        
+        const districtRoles = ["जिल्हाध्यक्ष", "शहराध्यक्ष", "कार्याध्यक्ष", "जिल्हा उपाध्यक्ष", "जिल्हा सरचिटणीस", "जिल्हा सहसचिव", "जिल्हा खजिनदार", "जिल्हा कायदेशीर सल्लागार", "जिल्हा प्रसिद्धी प्रमुख", "जिल्हा प्रवक्ता", "जिल्हा संघटक", "जिल्हा युवा अध्यक्ष", "तालीम संपर्क प्रमुख", "ज्येष्ठ मार्गदर्शक", "कार्यकारिणी सदस्य", "अन्य"];
+        const talukaRoles = ["अध्यक्ष", "शहराध्यक्ष", "उपाध्यक्ष", "कार्याध्यक्ष", "खजिनदार", "सचिव", "तांत्रिक समिती सदस्य", "प्रसिद्धी प्रमुख", "तालुका ज्येष्ठ मार्गदर्शक", "कार्यकारिणी सदस्य", "तालुका संपर्क प्रमुख", "कायदेशीर सल्लागार", "अन्य"];
+
+        let membersList = [];
+
+        function updateRoles() {
+            const level = document.getElementById("level").value;
+            const roleSelect = document.getElementById("role");
+            roleSelect.innerHTML = "<option value=''>-- पद निवडा --</option>";
+            
+            let roles = level === "जिल्हा" ? districtRoles : (level === "तालुका" ? talukaRoles : []);
+            
+            roles.forEach(r => {
+                let opt = document.createElement("option");
+                opt.value = r;
+                opt.textContent = r;
+                roleSelect.appendChild(opt);
+            });
+            checkOtherRole();
+        }
+
+        function checkOtherRole() {
+            const role = document.getElementById("role").value;
+            document.getElementById("otherRoleDiv").style.display = (role === "अन्य") ? "block" : "none";
+        }
+
+        function getBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function addMember() {
+            const level = document.getElementById("level").value;
+            const region = document.getElementById("region").value;
+            const role = document.getElementById("role").value;
+            const otherRole = document.getElementById("otherRole").value;
+            const fullName = document.getElementById("fullName").value;
+            const mobile = document.getElementById("mobile").value;
+            const photoFile = document.getElementById("photo").files[0];
+
+            if(!level || !region || !role || !fullName || !mobile || !photoFile) {
+                alert("कृपया सर्व माहिती भरा आणि फोटो निवडा!");
+                return;
+            }
+            if(mobile.length !== 10) {
+                alert("कृपया १० अंकी योग्य मोबाईल नंबर टाका.");
+                return;
+            }
+
+            try {
+                const base64Photo = await getBase64(photoFile);
+                
+                const memberData = {
+                    level: level,
+                    region: region,
+                    role: role,
+                    otherRole: otherRole,
+                    fullName: fullName,
+                    whatsapp: mobile,
+                    photoBase64: base64Photo
+                };
+                
+                membersList.push(memberData);
+                
+                document.getElementById("membersBadge").style.display = "block";
+                document.getElementById("count").textContent = membersList.length;
+                
+                document.getElementById("role").value = "";
+                document.getElementById("otherRole").value = "";
+                document.getElementById("fullName").value = "";
+                document.getElementById("mobile").value = "";
+                document.getElementById("photo").value = "";
+                checkOtherRole();
+                
+                alert(fullName + " यांची माहिती यादीत जोडली गेली. आणखी सदस्य जोडायचे असल्यास जोडा, किंवा 'सबमिट' करा.");
+            } catch(e) {
+                alert("फोटो प्रोसेस करताना अडचण आली.");
+            }
+        }
+
+        async function submitData() {
+            const fullName = document.getElementById("fullName").value;
+            if(fullName && membersList.length === 0) {
+                await addMember();
+            }
+            
+            if(membersList.length === 0) {
+                alert("सबमिट करण्यासाठी कोणतीही माहिती नाही!");
+                return;
+            }
+            
+            if(!SCRIPT_URL || SCRIPT_URL === "येथे_तुमची_WEB_APP_URL_टाका") {
+                alert("तांत्रिक त्रुटी: SCRIPT_URL टाकलेली नाही. कृपया कोडमध्ये जाऊन लिंक पेस्ट करा.");
+                return;
+            }
+
+            document.getElementById("submitBtn").disabled = true;
+            document.getElementById("loading").style.display = "block";
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ members: membersList })
+                });
+                
+                const result = await response.json();
+                
+                if(result.status === "success") {
+                    alert("✅ यशस्वी! " + result.message);
+                    membersList = [];
+                    document.getElementById("membersBadge").style.display = "none";
+                    document.getElementById("regForm").reset();
+                    updateRoles();
+                } else {
+                    alert("त्रुटी: " + result.message);
+                }
+            } catch (error) {
+                alert("इंटरनेट कनेक्शन किंवा सर्व्हरमध्ये अडचण आहे.");
+            } finally {
+                document.getElementById("submitBtn").disabled = false;
+                document.getElementById("loading").style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
